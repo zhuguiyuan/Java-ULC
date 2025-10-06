@@ -1,0 +1,8 @@
+*
+!.gitignore
+!*/
+!*.java
+!/pom.xml
+!/Makefile
+!/README.md
+!/.vscode/*
