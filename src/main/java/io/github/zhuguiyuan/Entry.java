@@ -31,7 +31,6 @@ class MFun {
   static Exp program42 = new App(add4, new Int(38));
 }
 
-
 class MEvalSubst {
   sealed interface Value {
   }
@@ -93,7 +92,6 @@ class MEvalSubst {
     System.out.println(result);
   }
 }
-
 
 class MEvalEnv {
   sealed interface Value {
@@ -157,7 +155,6 @@ class MEvalEnv {
     System.out.println(result);
   }
 }
-
 
 class MObjectEnvIR {
   sealed interface Exp {
@@ -289,22 +286,21 @@ class MObjectEnvIR {
 
   static GlobalMapWith<Exp> hoist_exp(Exp exp) {
     return switch (exp) {
+      case Val(ClosureV(var env, var arg, var body)) -> {
+        var bodyMap = hoist_exp(body);
+        var map = new GlobalMapWith<Exp>();
+        map.putAll(bodyMap);
+        var gName = new Global(mkUniqName("CODE"));
+        map.put(gName, new ClosureV(env, arg, bodyMap.top));
+        map.top = gName;
+        yield map;
+      }
       case Val(var v) -> {
-        if (v instanceof ClosureV(var env, var arg, var body)) {
-          var bodyMap = hoist_exp(body);
-          var map = new GlobalMapWith<Exp>();
-          map.putAll(bodyMap);
-          var gName = new Global(mkUniqName("CODE"));
-          map.put(gName, new ClosureV(env, arg, bodyMap.top));
-          map.top = gName;
-          yield map;
-        } else {
-          var valueMap = hoist_value(v);
-          var map = new GlobalMapWith<Exp>();
-          map.putAll(valueMap);
-          map.top = new Val(valueMap.top);
-          yield map;
-        }
+        var valueMap = hoist_value(v);
+        var map = new GlobalMapWith<Exp>();
+        map.putAll(valueMap);
+        map.top = new Val(valueMap.top);
+        yield map;
       }
       case Var var -> {
         var map = new GlobalMapWith<Exp>();
@@ -457,7 +453,6 @@ class MObjectEnvIR {
     System.out.println(eval(program));
   }
 }
-
 
 public class Entry {
   public static void main(String[] args) {
